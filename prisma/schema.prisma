@@ -16,7 +16,7 @@ datasource db {
 model Post {
   id        String   @id @default(uuid())
   title     String
-  content   String
+  content   String   @db.Text
   slug      String   @unique
   createdAt DateTime @default(now()) @map("created_at")
 
