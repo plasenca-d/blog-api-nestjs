@@ -6,6 +6,7 @@ import {
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PaginationDto } from 'src/shared/dtos/pagination.dto';
 
 @Injectable()
 export class PostsService {
@@ -38,8 +39,23 @@ export class PostsService {
     });
   }
 
-  findAll() {
-    return `This action returns all posts`;
+  async findAll(paginationDto: PaginationDto) {
+    const { page = 1, limit = 10 } = paginationDto;
+
+    const posts = await this.prismaService.post.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return posts.map((post) => ({
+      ...post,
+      content:
+        post.content.substring(0, 200) +
+        (post.content.length > 200 ? '...' : ''),
+    }));
   }
 
   async findOne(id: string) {
