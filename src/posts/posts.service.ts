@@ -2,88 +2,22 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-  OnModuleInit,
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationDto } from 'src/shared/dtos/pagination.dto';
 
-import { faker } from '@faker-js/faker';
+import { convertTextToSlug } from '@/helpers/text.helper';
 
 @Injectable()
-export class PostsService implements OnModuleInit {
+export class PostsService {
   constructor(private readonly prismaService: PrismaService) {}
-
-  async onModuleInit() {
-    await this.removeAll();
-
-    for (let i = 0; i < 10; i++) {
-      try {
-        await this.create({
-          title: faker.lorem.words(3),
-          content: this.generateMarkdown(),
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  }
-
-  private generateMarkdown() {
-    return `
-# ${faker.lorem.words(4)}
-
-${faker.lorem.paragraphs(3)}
-
-## ${faker.lorem.words(3)}
-
-${faker.lorem.paragraphs(2)}
-
-### 📌 ${faker.lorem.words(3)}
-
-- ✅ ${faker.lorem.sentence()}
-- ✅ ${faker.lorem.sentence()}
-- ✅ ${faker.lorem.sentence()}
-- ✅ ${faker.lorem.sentence()}
-- ✅ ${faker.lorem.sentence()}
-
----
-
-### **📷 Imagen Aleatoria**
-![${faker.lorem.words(2)}](https://source.unsplash.com/random/800x400?sig=${faker.number.int(100)})
-
----
-
-## 🔥 ${faker.lorem.words(3)}
-
-> "${faker.lorem.sentence()}"
-
-${faker.lorem.paragraphs(2)}
-
-### **Código Aleatorio**
-\`\`\`javascript
-function ${faker.lorem.word()}() {
-  console.log("${faker.hacker.phrase()}");
-}
-\`\`\`
-
-### 📢 **Conclusión**
-${faker.lorem.paragraphs(2)}
-
-[Lee más aquí](https://${faker.internet.domainName()})
-    `;
-  }
 
   async create(createPostDto: CreatePostDto) {
     const { title, content } = createPostDto;
 
-    const slug = title
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]+/g, '')
-      .replace(/--+/g, '-')
-      .replace(/^-+|-+$/g, '');
+    const slug = convertTextToSlug(title);
 
     const existingPost = await this.prismaService.post.findUnique({
       where: { slug },

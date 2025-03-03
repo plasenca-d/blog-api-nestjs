@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsString, IsUUID } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
@@ -19,4 +19,13 @@ export class CreatePostDto {
     required: true,
   })
   content: string;
+
+  @IsUUID()
+  @ApiProperty({
+    description: 'The category of the post',
+    example: 'random uuid',
+    type: String,
+    required: true,
+  })
+  categoryId: string;
 }

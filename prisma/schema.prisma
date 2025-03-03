@@ -14,11 +14,24 @@ datasource db {
 }
 
 model Post {
-  id        String   @id @default(uuid())
-  title     String
-  content   String   @db.Text
-  slug      String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
+  id         String    @id @default(uuid())
+  title      String
+  content    String    @db.Text
+  slug       String    @unique
+  createdAt  DateTime  @default(now()) @map("created_at")
+  categoryId String?   @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id])
 
   @@map("posts")
+}
+
+model Category {
+  id    String @id @default(uuid())
+  name  String
+  slug  String @unique
+  color String
+
+  Post Post[]
+
+  @@map("categories")
 }
